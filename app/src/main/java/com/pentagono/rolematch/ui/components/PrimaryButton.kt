@@ -14,7 +14,7 @@ fun PrimaryButton(
     Button(
         onClick = onClick,
         colors = ButtonDefaults.buttonColors(
-            containerColor = Color(0xFFFF6A00)
+            containerColor = Color(0xFF496500)
         ),
         modifier = modifier
     ) {
