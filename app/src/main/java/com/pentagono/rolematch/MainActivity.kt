@@ -1,49 +1,34 @@
 package com.pentagono.rolematch
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import com.pentagono.rolematch.ui.theme.RoleMatchTheme
-import com.pentagono.rolematch.screens.CupomScreen
+import com.pentagono.rolematch.ui.screens.restaurant_setup.RestaurantSetupScreen
 
 class MainActivity : ComponentActivity() {
+    @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
         setContent {
             RoleMatchTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    // Greeting(
-                    //    name = "Android",
-                    //    modifier = Modifier.padding(innerPadding)
-                    // )
-                    CupomScreen()
+                Scaffold(
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    RestaurantSetupScreen()
                 }
             }
         }
     }
 }
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    RoleMatchTheme {
-        Greeting("Android")
-    }
-}
+
+
