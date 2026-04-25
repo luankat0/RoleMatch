@@ -13,3 +13,11 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+.pytest_cache/
