@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.graphics.Color
 
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -18,95 +17,83 @@ import com.pentagono.rolematch.ui.components.InputWithIcon
 
 @Composable
 fun BasicInfoStep(viewModel: RestaurantSetupViewModel) {
+
     val state by viewModel.state.collectAsState()
 
-    Column {
+    Column(
+        modifier = Modifier.fillMaxSize()
+    ) {
 
-        Text(
-            "Informações Básicas",
-            style = MaterialTheme.typography.titleMedium
-        )
+        Text("Informações Básicas", style = MaterialTheme.typography.titleMedium)
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // 📍 ENDEREÇO
         InputWithIcon(
             value = state.address,
             onChange = { viewModel.update { copy(address = it) } },
             label = "Endereço completo",
             icon = Icons.Default.LocationOn,
+            placeholder = "Rua, número, bairro, cidade",
             modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // 📞 TELEFONE
         InputWithIcon(
             value = state.phone,
             onChange = { viewModel.update { copy(phone = it) } },
             label = "Telefone",
             icon = Icons.Default.Phone,
+            placeholder = "(11) 98765-4321",
             modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // 🌐 WEBSITE
         InputWithIcon(
             value = state.website,
             onChange = { viewModel.update { copy(website = it) } },
-            label = "Website",
+            label = "Website (opcional)",
             icon = Icons.Default.Language,
+            placeholder = "www.seurestaurante.com.br",
             modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // 📸 INSTAGRAM
         InputWithIcon(
             value = state.instagram,
             onChange = { viewModel.update { copy(instagram = it) } },
-            label = "Instagram",
+            label = "Instagram (opcional)",
             icon = Icons.Default.CameraAlt,
+            placeholder = "@seurestaurante",
             modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // 👍 FACEBOOK
         InputWithIcon(
             value = state.facebook,
             onChange = { viewModel.update { copy(facebook = it) } },
-            label = "Facebook",
+            label = "Facebook (opcional)",
             icon = Icons.Default.ThumbUp,
+            placeholder = "SeuRestaurante",
             modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
-// 📝 DESCRIÇÃO / HISTÓRIA
         OutlinedTextField(
             value = state.description,
             onValueChange = {
                 viewModel.update { copy(description = it) }
             },
-            label = { Text("História do restaurante") },
+            label = { Text("Descrição/História do restaurante") },
+            placeholder = { Text("Conte um pouco sobre a história do seu restaurante...") },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(120.dp),
             maxLines = 5
         )
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Button(
-            onClick = { viewModel.nextStep() },
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFFFF6A00)
-            ),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Continuar")
-        }
     }
 }

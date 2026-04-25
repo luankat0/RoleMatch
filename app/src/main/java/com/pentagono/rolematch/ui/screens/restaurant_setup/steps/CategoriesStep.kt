@@ -5,8 +5,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.material3.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 
 import androidx.compose.runtime.collectAsState
@@ -14,7 +14,6 @@ import androidx.compose.runtime.getValue
 
 import com.pentagono.rolematch.viewmodel.RestaurantSetupViewModel
 import com.pentagono.rolematch.ui.components.SelectableChip
-import com.pentagono.rolematch.ui.components.PrimaryButton
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -23,7 +22,7 @@ fun CategoriesStep(viewModel: RestaurantSetupViewModel) {
     val state by viewModel.state.collectAsState()
 
     val establishmentTypes = listOf(
-        "Restaurante", "Bar", "Cafeteria",
+        "Restaurante", "Cafeteria", "Bar",
         "Pizzaria", "Bistrô", "Churrascaria"
     )
 
@@ -32,24 +31,16 @@ fun CategoriesStep(viewModel: RestaurantSetupViewModel) {
         "Mexicana", "Francesa", "Árabe"
     )
 
-    val vouchers = listOf(
-        "Alelo", "VR", "Sodexo", "Ticket"
-    )
-
+    val vouchers = listOf("Alelo", "VR", "Sodexo", "Ticket")
     val prices = listOf("$", "$$", "$$$", "$$$$")
 
-    Column(modifier = Modifier.padding(16.dp)) {
+    Column {
 
-        // 🔙 BOTÃO VOLTAR
-        TextButton(onClick = { viewModel.previousStep() }) {
-            Text("← Voltar")
-        }
+        Text("Categorias e Características", style = MaterialTheme.typography.titleMedium)
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
-        // 🏪 TIPO DE ESTABELECIMENTO
         Text("Tipo de estabelecimento")
-
         Spacer(modifier = Modifier.height(8.dp))
 
         FlowRow(
@@ -64,10 +55,10 @@ fun CategoriesStep(viewModel: RestaurantSetupViewModel) {
                         viewModel.update {
                             copy(
                                 establishmentTypes =
-                                    if (establishmentTypes.contains(type))
-                                        establishmentTypes - type
+                                    if (state.establishmentTypes.contains(type))
+                                        state.establishmentTypes - type
                                     else
-                                        establishmentTypes + type
+                                        state.establishmentTypes + type
                             )
                         }
                     }
@@ -77,9 +68,7 @@ fun CategoriesStep(viewModel: RestaurantSetupViewModel) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // 🍝 TIPO DE COZINHA
         Text("Tipo de cozinha")
-
         Spacer(modifier = Modifier.height(8.dp))
 
         FlowRow(
@@ -94,10 +83,10 @@ fun CategoriesStep(viewModel: RestaurantSetupViewModel) {
                         viewModel.update {
                             copy(
                                 cuisineTypes =
-                                    if (cuisineTypes.contains(type))
-                                        cuisineTypes - type
+                                    if (state.cuisineTypes.contains(type))
+                                        state.cuisineTypes - type
                                     else
-                                        cuisineTypes + type
+                                        state.cuisineTypes + type
                             )
                         }
                     }
@@ -107,25 +96,27 @@ fun CategoriesStep(viewModel: RestaurantSetupViewModel) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // 💲 FAIXA DE PREÇO
         Text("Faixa de preço")
-
         Spacer(modifier = Modifier.height(8.dp))
 
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
             prices.forEachIndexed { index, price ->
-                Button(
+                val selected = state.priceRange == index + 1
+
+                OutlinedButton(
                     onClick = {
                         viewModel.update {
                             copy(priceRange = index + 1)
                         }
                     },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor =
-                            if (state.priceRange == index + 1)
-                                Color(0xFFFF6A00)
-                            else Color.LightGray
-                    )
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        containerColor = if (selected) Color(0xFFFF6A00) else Color.Transparent,
+                        contentColor = if (selected) Color.White else MaterialTheme.colorScheme.onSurface
+                    ),
+                    modifier = Modifier.weight(1f)
                 ) {
                     Text(price)
                 }
@@ -134,9 +125,7 @@ fun CategoriesStep(viewModel: RestaurantSetupViewModel) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // 🎫 VALE REFEIÇÃO
-        Text("Vale refeição aceitos")
-
+        Text("Vales refeição aceitos")
         Spacer(modifier = Modifier.height(8.dp))
 
         FlowRow(
@@ -151,10 +140,10 @@ fun CategoriesStep(viewModel: RestaurantSetupViewModel) {
                         viewModel.update {
                             copy(
                                 mealVouchers =
-                                    if (mealVouchers.contains(voucher))
-                                        mealVouchers - voucher
+                                    if (state.mealVouchers.contains(voucher))
+                                        state.mealVouchers - voucher
                                     else
-                                        mealVouchers + voucher
+                                        state.mealVouchers + voucher
                             )
                         }
                     }
@@ -164,37 +153,31 @@ fun CategoriesStep(viewModel: RestaurantSetupViewModel) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // 🐶 👶 FEATURES
-        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
             FilterChip(
                 selected = state.petFriendly,
                 onClick = {
                     viewModel.update {
-                        copy(petFriendly = !petFriendly)
+                        copy(petFriendly = !state.petFriendly)
                     }
                 },
-                label = { Text("Pet Friendly") }
+                label = { Text("Pet Friendly") },
+                modifier = Modifier.weight(1f)
             )
 
             FilterChip(
                 selected = state.kidsArea,
                 onClick = {
                     viewModel.update {
-                        copy(kidsArea = !kidsArea)
+                        copy(kidsArea = !state.kidsArea)
                     }
                 },
-                label = { Text("Área Kids") }
+                label = { Text("Área Kids") },
+                modifier = Modifier.weight(1f)
             )
         }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // ➡️ CONTINUAR
-        PrimaryButton(
-            text = "Continuar",
-            onClick = { viewModel.nextStep() },
-            modifier = Modifier.fillMaxWidth()
-        )
     }
 }
