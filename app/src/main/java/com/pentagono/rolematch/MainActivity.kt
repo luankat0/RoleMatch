@@ -4,7 +4,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -16,8 +15,8 @@ import androidx.navigation.compose.rememberNavController
 import com.pentagono.rolematch.screens.CupomScreen
 import com.pentagono.rolematch.screens.MatchPreferencesScreen
 import com.pentagono.rolematch.screens.ProfileScreen
-import com.pentagono.rolematch.ui.components.BottomBar
-import com.pentagono.rolematch.ui.screens.restaurant_setup.RestaurantSetupScreen
+import com.pentagono.rolematch.presentation.components.BottomBar
+import com.pentagono.rolematch.screens.RestaurantSetupScreen
 import com.pentagono.rolematch.ui.theme.RoleMatchTheme
 
 class MainActivity : ComponentActivity() {

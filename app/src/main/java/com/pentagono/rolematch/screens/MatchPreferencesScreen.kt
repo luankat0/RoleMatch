@@ -23,8 +23,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.pentagono.rolematch.ui.components.BottomBar
-import com.pentagono.rolematch.ui.components.SelectableChip
+import com.pentagono.rolematch.presentation.components.BottomBar
+import com.pentagono.rolematch.presentation.components.SelectableChip
 
 @Composable
 fun MatchPreferencesScreen(navController: NavController) {

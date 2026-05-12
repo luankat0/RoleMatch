@@ -1,4 +1,4 @@
-package com.pentagono.rolematch.ui.screens.restaurant_setup.steps
+package com.pentagono.rolematch.screens.restaurant.setup.steps
 
 import androidx.compose.runtime.*
 import androidx.compose.foundation.layout.*
@@ -16,7 +16,7 @@ import androidx.compose.material.icons.outlined.Link
 import androidx.compose.material.icons.outlined.Upload
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import com.pentagono.rolematch.viewmodel.RestaurantSetupViewModel
+import com.pentagono.rolematch.presentation.viewmodel.RestaurantSetupViewModel
 
 @Composable
 fun PhotosStep(viewModel: RestaurantSetupViewModel) {

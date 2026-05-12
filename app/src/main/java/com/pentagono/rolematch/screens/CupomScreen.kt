@@ -39,7 +39,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.pentagono.rolematch.ui.components.BottomBar
+import com.pentagono.rolematch.presentation.components.BottomBar
 
 data class CupomV2(
     val restaurante: String,

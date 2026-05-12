@@ -1,4 +1,4 @@
-package com.pentagono.rolematch.ui.screens.restaurant_setup
+package com.pentagono.rolematch.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -10,7 +10,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.pentagono.rolematch.viewmodel.RestaurantSetupViewModel
+import com.pentagono.rolematch.presentation.viewmodel.RestaurantSetupViewModel
+import com.pentagono.rolematch.screens.restaurant.setup.steps.BasicInfoStep
+import com.pentagono.rolematch.screens.restaurant.setup.steps.CategoriesStep
+import com.pentagono.rolematch.screens.restaurant.setup.steps.PhotosStep
 import com.pentagono.rolematch.ui.screens.restaurant_setup.steps.*
 
 @Composable

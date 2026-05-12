@@ -1,9 +1,9 @@
-package com.pentagono.rolematch.viewmodel
+package com.pentagono.rolematch.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import com.pentagono.rolematch.model.RestaurantSetup
+import com.pentagono.rolematch.domain.model.RestaurantSetup
 
 class RestaurantSetupViewModel : ViewModel() {
 

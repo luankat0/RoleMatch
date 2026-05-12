@@ -1,4 +1,4 @@
-package com.pentagono.rolematch.model
+package com.pentagono.rolematch.domain.model
 
 data class RestaurantSetup(
     val address: String = "",

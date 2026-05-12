@@ -1,4 +1,4 @@
-package com.pentagono.rolematch.ui.components
+package com.pentagono.rolematch.presentation.components
 
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults

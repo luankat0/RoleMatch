@@ -6,7 +6,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.pentagono.rolematch.ui.components.BottomBar
+import com.pentagono.rolematch.presentation.components.BottomBar
 
 @Composable
 fun ProfileScreen(navController: NavController) {

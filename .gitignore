@@ -11,7 +11,8 @@
 /build
 /captures
 .externalNativeBuild
-.cxx
+.cr
+xx
 local.properties
 
 # Python

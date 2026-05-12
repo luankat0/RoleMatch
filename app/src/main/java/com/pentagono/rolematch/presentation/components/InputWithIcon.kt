@@ -1,4 +1,4 @@
-package com.pentagono.rolematch.ui.components
+package com.pentagono.rolematch.presentation.components
 
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable

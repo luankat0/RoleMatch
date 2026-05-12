@@ -1,4 +1,4 @@
-package com.pentagono.rolematch.ui.screens.restaurant_setup.steps
+package com.pentagono.rolematch.screens.restaurant.setup.steps
 
 import androidx.compose.runtime.*
 import androidx.compose.foundation.layout.*
@@ -12,8 +12,8 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 
-import com.pentagono.rolematch.viewmodel.RestaurantSetupViewModel
-import com.pentagono.rolematch.ui.components.SelectableChip
+import com.pentagono.rolematch.presentation.viewmodel.RestaurantSetupViewModel
+import com.pentagono.rolematch.presentation.components.SelectableChip
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
