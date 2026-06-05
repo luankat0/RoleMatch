@@ -106,11 +106,7 @@ com.pentagono.rolematch
 
 ## 🛠️ Próximos Passos
 
-- [ ] Integrar Firebase Authentication
-- [ ] Implementar Firestore repositories
-- [ ] Cloud Functions para validação segura de QR Code
 - [ ] Firebase Storage para fotos
-- [ ] Push notifications com FCM
 - [ ] Geolocalização real
 - [ ] Match Engine com ML
 
