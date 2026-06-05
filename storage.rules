@@ -1,0 +1,73 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // ── Helper functions ──────────────────────────────────────────────────────
+
+    function isAuth() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return request.auth.uid == uid;
+    }
+
+    function isImage() {
+      return request.resource.contentType.matches('image/(jpeg|jpg|png|webp)');
+    }
+
+    function isPdf() {
+      return request.resource.contentType == 'application/pdf';
+    }
+
+    function maxSizeMB(mb) {
+      return request.resource.size <= mb * 1024 * 1024;
+    }
+
+    // ── User profile photos ───────────────────────────────────────────────────
+    match /users/{userId}/profile/{filename} {
+      allow read:   if isAuth();
+      allow write:  if isOwner(userId) && isImage() && maxSizeMB(5);
+      allow delete: if isOwner(userId);
+    }
+
+    // ── Restaurant photos ─────────────────────────────────────────────────────
+    match /restaurants/{restaurantId}/photos/{filename} {
+      allow read: if true; // public
+      allow write: if isAuth() &&
+                      request.auth.uid == firestore.get(
+                        /databases/(default)/documents/restaurants/$(restaurantId)
+                      ).data.ownerId &&
+                      isImage() &&
+                      maxSizeMB(5);
+      allow delete: if isAuth() &&
+                       request.auth.uid == firestore.get(
+                         /databases/(default)/documents/restaurants/$(restaurantId)
+                       ).data.ownerId;
+    }
+
+    // ── Restaurant menus (PDF) ────────────────────────────────────────────────
+    match /restaurants/{restaurantId}/menu/{filename} {
+      allow read: if true; // public
+      allow write: if isAuth() &&
+                      request.auth.uid == firestore.get(
+                        /databases/(default)/documents/restaurants/$(restaurantId)
+                      ).data.ownerId &&
+                      isPdf() &&
+                      maxSizeMB(20);
+    }
+
+    // ── Review photos (uploaded by users) ────────────────────────────────────
+    match /reviews/{userId}/{filename} {
+      allow read:   if true;
+      allow write:  if isOwner(userId) && isImage() && maxSizeMB(5);
+      allow delete: if isOwner(userId);
+    }
+
+    // ── Block everything else ─────────────────────────────────────────────────
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

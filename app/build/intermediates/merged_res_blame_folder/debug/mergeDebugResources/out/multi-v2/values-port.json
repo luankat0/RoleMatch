@@ -1,0 +1,19 @@
+{
+    "logs": [
+        {
+            "outputFile": "com.pentagono.rolematch.app-mergeDebugResources-66:/values-port/values-port.xml",
+            "map": [
+                {
+                    "source": "/Users/miguel/.gradle/caches/9.3.1/transforms/c7d0c91a571ed72ace51bd1100ddf13c/transformed/appcompat-1.6.1/res/values-port/values-port.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "55",
+                        "endOffsets": "106"
+                    }
+                }
+            ]
+        }
+    ]
+}
