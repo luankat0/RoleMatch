@@ -16,3 +16,8 @@ app/google-services.json
 
 # Kotlin
 *.class
+
+# Build outputs
+**/build/
+*.apk
+*.aab
