@@ -47,6 +47,13 @@ fun MatchPreferencesScreen(
 ) {
     val state by viewModel.state.collectAsState()
 
+    // Navega para resultados apenas quando a busca terminar
+    LaunchedEffect(state.hasSearched) {
+        if (state.hasSearched) {
+            onNavigateToResults()
+        }
+    }
+
     Scaffold(
         topBar = {
             Surface(color = MaterialTheme.colorScheme.surface, shadowElevation = 2.dp) {
@@ -68,8 +75,13 @@ fun MatchPreferencesScreen(
         bottomBar = {
             Column {
                 GradientMatchButton(
-                    text = "Buscar Match",
-                    onClick = { viewModel.search(); onNavigateToResults() },
+                    text = if (state.isLoading) "Buscando..." else "Buscar Match",
+                    onClick = {
+                        if (!state.isLoading) {
+                            viewModel.resetSearch()
+                            viewModel.search()
+                        }
+                    },
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
                 )
                 UserBottomBar(currentRoute = "match") { route ->
@@ -83,6 +95,27 @@ fun MatchPreferencesScreen(
         },
         containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
+
+        if (state.isLoading) {
+            Box(
+                modifier = Modifier.fillMaxSize().padding(padding),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    CircularProgressIndicator(color = PrimaryGreen)
+                    Text(
+                        "Buscando o seu Match perfeito...",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontSize = 14.sp
+                    )
+                }
+            }
+            return@Scaffold
+        }
+
         Column(
             modifier = Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)
@@ -174,7 +207,6 @@ fun ProfileScreen(
     val userState by userViewModel.state.collectAsState()
     val user = userState.user
 
-    // Reservas reais do Firestore
     val reservationRepo = remember { RepositoryProvider.reservation }
     var reservations by remember { mutableStateOf<List<Reservation>>(emptyList()) }
     var reservationsLoading by remember { mutableStateOf(true) }
@@ -272,7 +304,6 @@ fun ProfileScreen(
                                     }
                                 }
                             }
-                            // Botão de editar foto
                             Surface(
                                 shape = CircleShape,
                                 color = PrimaryGreen,
