@@ -23,7 +23,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.pentagono.rolematch.core.theme.*
@@ -36,8 +35,9 @@ import com.pentagono.rolematch.core.theme.StatusOpenBg
 import com.pentagono.rolematch.core.theme.TextDark
 import com.pentagono.rolematch.core.theme.TextLight
 import com.pentagono.rolematch.core.theme.WarningYellow
-import com.pentagono.rolematch.data.repository.RepositoryProvider
+import com.pentagono.rolematch.di.appViewModel
 import com.pentagono.rolematch.domain.model.Coupon
+import com.pentagono.rolematch.domain.repository.CouponRepository
 import com.pentagono.rolematch.presentation.components.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -46,6 +46,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.text.SimpleDateFormat
 import java.util.*
+import javax.inject.Inject
 
 // ─── ViewModel ────────────────────────────────────────────────────────────────
 
@@ -73,7 +74,9 @@ data class CouponFormState(
     val codeError: String = ""
 )
 
-class RestaurantCouponsViewModel : ViewModel() {
+class RestaurantCouponsViewModel @Inject constructor(
+    private val couponRepo: CouponRepository
+) : ViewModel() {
 
     private val _state = MutableStateFlow(CouponsUiState())
     val state: StateFlow<CouponsUiState> = _state.asStateFlow()
@@ -81,7 +84,6 @@ class RestaurantCouponsViewModel : ViewModel() {
     private val _formState = MutableStateFlow(CouponFormState())
     val formState: StateFlow<CouponFormState> = _formState.asStateFlow()
 
-    private val couponRepo = RepositoryProvider.coupon
     private val auth = FirebaseAuth.getInstance()
     private val firestore = FirebaseFirestore.getInstance()
 
@@ -240,7 +242,7 @@ fun RestaurantCouponsScreen(
     onNavigateToHome: () -> Unit,
     onNavigateToDashboard: () -> Unit,
     onNavigateToProfile: () -> Unit,
-    viewModel: RestaurantCouponsViewModel = viewModel()
+    viewModel: RestaurantCouponsViewModel = appViewModel { RestaurantCouponsViewModel(it.couponRepository()) }
 ) {
     val state by viewModel.state.collectAsState()
     val formState by viewModel.formState.collectAsState()

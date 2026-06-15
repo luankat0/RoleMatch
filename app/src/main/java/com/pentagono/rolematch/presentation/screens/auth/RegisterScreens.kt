@@ -15,7 +15,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -27,16 +26,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.pentagono.rolematch.core.CredentialHolder
 import com.pentagono.rolematch.core.theme.*
 import com.pentagono.rolematch.core.validators.*
-import com.pentagono.rolematch.data.repository.RepositoryProvider
+import com.pentagono.rolematch.di.appViewModel
+import com.pentagono.rolematch.domain.repository.AuthRepository
 import com.pentagono.rolematch.presentation.components.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 // ─── Register User ────────────────────────────────────────────────────────────
 
@@ -60,12 +60,12 @@ data class RegisterUserState(
     val generalError: String = ""
 )
 
-class RegisterUserViewModel : ViewModel() {
+class RegisterUserViewModel @Inject constructor(
+    private val authRepository: AuthRepository
+) : ViewModel() {
 
     private val _state = MutableStateFlow(RegisterUserState())
     val state: StateFlow<RegisterUserState> = _state.asStateFlow()
-
-    private val authRepository = RepositoryProvider.auth
 
     fun onNameChange(v: String) = update { copy(name = v, nameError = "") }
     fun onEmailChange(v: String) = update { copy(email = v, emailError = "") }
@@ -156,11 +156,10 @@ class RegisterUserViewModel : ViewModel() {
 fun RegisterUserScreen(
     onNavigateToLogin: () -> Unit,
     onNavigateToVerify: () -> Unit,
-    viewModel: RegisterUserViewModel = viewModel()
+    viewModel: RegisterUserViewModel = appViewModel { RegisterUserViewModel(it.authRepository()) }
 ) {
     val state by viewModel.state.collectAsState()
     val focusManager = LocalFocusManager.current
-    val uriHandler = LocalUriHandler.current
 
     LaunchedEffect(state.navigateToVerify) {
         if (state.navigateToVerify) {
@@ -191,18 +190,11 @@ fun RegisterUserScreen(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                ),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 elevation = CardDefaults.cardElevation(4.dp)
             ) {
                 Column(modifier = Modifier.padding(28.dp)) {
-                    Text(
-                        "Criar conta",
-                        fontWeight = FontWeight.ExtraBold,
-                        fontSize = 24.sp,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
+                    Text("Criar conta", fontWeight = FontWeight.ExtraBold, fontSize = 24.sp, color = MaterialTheme.colorScheme.onSurface)
                     Spacer(Modifier.height(4.dp))
                     Text(
                         "Junte-se e descubra os melhores restaurantes",
@@ -219,13 +211,8 @@ fun RegisterUserScreen(
                         isError = state.nameError.isNotEmpty(),
                         errorMessage = state.nameError,
                         placeholder = "João Silva",
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Text,
-                            imeAction = ImeAction.Next
-                        ),
-                        keyboardActions = KeyboardActions(
-                            onNext = { focusManager.moveFocus(FocusDirection.Down) }
-                        )
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text, imeAction = ImeAction.Next),
+                        keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) })
                     )
                     Spacer(Modifier.height(14.dp))
                     RoleMatchTextField(
@@ -236,13 +223,8 @@ fun RegisterUserScreen(
                         isError = state.emailError.isNotEmpty(),
                         errorMessage = state.emailError,
                         placeholder = "seu@email.com",
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Email,
-                            imeAction = ImeAction.Next
-                        ),
-                        keyboardActions = KeyboardActions(
-                            onNext = { focusManager.moveFocus(FocusDirection.Down) }
-                        )
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next),
+                        keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) })
                     )
                     Spacer(Modifier.height(14.dp))
                     RoleMatchTextField(
@@ -253,13 +235,8 @@ fun RegisterUserScreen(
                         isError = state.phoneError.isNotEmpty(),
                         errorMessage = state.phoneError,
                         placeholder = "(11) 98765-4321",
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Phone,
-                            imeAction = ImeAction.Next
-                        ),
-                        keyboardActions = KeyboardActions(
-                            onNext = { focusManager.moveFocus(FocusDirection.Down) }
-                        )
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone, imeAction = ImeAction.Next),
+                        keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) })
                     )
                     Spacer(Modifier.height(14.dp))
                     RoleMatchTextField(
@@ -270,13 +247,8 @@ fun RegisterUserScreen(
                         isError = state.cpfError.isNotEmpty(),
                         errorMessage = state.cpfError,
                         placeholder = "000.000.000-00",
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Number,
-                            imeAction = ImeAction.Next
-                        ),
-                        keyboardActions = KeyboardActions(
-                            onNext = { focusManager.moveFocus(FocusDirection.Down) }
-                        )
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next),
+                        keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) })
                     )
                     Spacer(Modifier.height(14.dp))
                     PasswordTextField(
@@ -301,44 +273,22 @@ fun RegisterUserScreen(
 
                     Spacer(Modifier.height(16.dp))
 
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
+                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                         Checkbox(
                             checked = state.termsAccepted,
                             onCheckedChange = viewModel::onTermsChange,
                             colors = CheckboxDefaults.colors(
                                 checkedColor = PrimaryGreen,
-                                uncheckedColor = if (state.termsError.isNotEmpty())
-                                    MaterialTheme.colorScheme.error
-                                else
-                                    MaterialTheme.colorScheme.outline
+                                uncheckedColor = if (state.termsError.isNotEmpty()) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.outline
                             )
                         )
                         Spacer(Modifier.width(4.dp))
                         Text(
                             buildAnnotatedString {
-                                withStyle(SpanStyle(
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    fontSize = 13.sp
-                                )) { append("Li e aceito os ") }
-                                withStyle(SpanStyle(
-                                    color = PrimaryGreen,
-                                    fontSize = 13.sp,
-                                    fontWeight = FontWeight.SemiBold,
-                                    textDecoration = TextDecoration.Underline
-                                )) { append("Termos de Uso") }
-                                withStyle(SpanStyle(
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    fontSize = 13.sp
-                                )) { append(" e a ") }
-                                withStyle(SpanStyle(
-                                    color = PrimaryGreen,
-                                    fontSize = 13.sp,
-                                    fontWeight = FontWeight.SemiBold,
-                                    textDecoration = TextDecoration.Underline
-                                )) { append("Política de Privacidade") }
+                                withStyle(SpanStyle(color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 13.sp)) { append("Li e aceito os ") }
+                                withStyle(SpanStyle(color = PrimaryGreen, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, textDecoration = TextDecoration.Underline)) { append("Termos de Uso") }
+                                withStyle(SpanStyle(color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 13.sp)) { append(" e a ") }
+                                withStyle(SpanStyle(color = PrimaryGreen, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, textDecoration = TextDecoration.Underline)) { append("Política de Privacidade") }
                             }
                         )
                     }
@@ -354,44 +304,24 @@ fun RegisterUserScreen(
                     if (state.generalError.isNotEmpty()) {
                         Spacer(Modifier.height(14.dp))
                         Card(
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.errorContainer
-                            ),
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
                             shape = RoundedCornerShape(8.dp),
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text(
-                                state.generalError,
-                                color = MaterialTheme.colorScheme.error,
-                                fontSize = 13.sp,
-                                modifier = Modifier.padding(12.dp)
-                            )
+                            Text(state.generalError, color = MaterialTheme.colorScheme.error, fontSize = 13.sp, modifier = Modifier.padding(12.dp))
                         }
                     }
 
                     Spacer(Modifier.height(24.dp))
-                    PrimaryButton(
-                        "Criar conta",
-                        viewModel::onRegister,
-                        Modifier.fillMaxWidth(),
-                        isLoading = state.isLoading
-                    )
+                    PrimaryButton("Criar conta", viewModel::onRegister, Modifier.fillMaxWidth(), isLoading = state.isLoading)
 
                     Spacer(Modifier.height(16.dp))
-                    Box(
-                        modifier = Modifier.fillMaxWidth(),
-                        contentAlignment = Alignment.Center
-                    ) {
+                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                         TextButton(onClick = onNavigateToLogin) {
                             Text(
                                 buildAnnotatedString {
-                                    withStyle(SpanStyle(
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )) { append("Já tem uma conta? ") }
-                                    withStyle(SpanStyle(
-                                        color = PrimaryGreen,
-                                        fontWeight = FontWeight.Bold
-                                    )) { append("Faça login") }
+                                    withStyle(SpanStyle(color = MaterialTheme.colorScheme.onSurfaceVariant)) { append("Já tem uma conta? ") }
+                                    withStyle(SpanStyle(color = PrimaryGreen, fontWeight = FontWeight.Bold)) { append("Faça login") }
                                 },
                                 fontSize = 14.sp
                             )
@@ -427,12 +357,12 @@ data class RegisterRestaurantState(
     val generalError: String = ""
 )
 
-class RegisterRestaurantViewModel : ViewModel() {
+class RegisterRestaurantViewModel @Inject constructor(
+    private val authRepository: AuthRepository
+) : ViewModel() {
 
     private val _state = MutableStateFlow(RegisterRestaurantState())
     val state: StateFlow<RegisterRestaurantState> = _state.asStateFlow()
-
-    private val authRepository = RepositoryProvider.auth
 
     fun onNameChange(v: String) = update { copy(name = v, nameError = "") }
     fun onEmailChange(v: String) = update { copy(email = v, emailError = "") }
@@ -523,11 +453,10 @@ class RegisterRestaurantViewModel : ViewModel() {
 fun RegisterRestaurantScreen(
     onNavigateToLogin: () -> Unit,
     onNavigateToSetup: () -> Unit,
-    viewModel: RegisterRestaurantViewModel = viewModel()
+    viewModel: RegisterRestaurantViewModel = appViewModel { RegisterRestaurantViewModel(it.authRepository()) }
 ) {
     val state by viewModel.state.collectAsState()
     val focusManager = LocalFocusManager.current
-    val uriHandler = LocalUriHandler.current
 
     LaunchedEffect(state.navigateToSetup) {
         if (state.navigateToSetup) {
@@ -558,18 +487,11 @@ fun RegisterRestaurantScreen(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                ),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 elevation = CardDefaults.cardElevation(4.dp)
             ) {
                 Column(modifier = Modifier.padding(28.dp)) {
-                    Text(
-                        "Criar conta",
-                        fontWeight = FontWeight.ExtraBold,
-                        fontSize = 24.sp,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
+                    Text("Criar conta", fontWeight = FontWeight.ExtraBold, fontSize = 24.sp, color = MaterialTheme.colorScheme.onSurface)
                     Spacer(Modifier.height(4.dp))
                     Text(
                         "Cadastre seu restaurante e alcance mais clientes",
@@ -586,13 +508,8 @@ fun RegisterRestaurantScreen(
                         isError = state.nameError.isNotEmpty(),
                         errorMessage = state.nameError,
                         placeholder = "Restaurante XYZ",
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Text,
-                            imeAction = ImeAction.Next
-                        ),
-                        keyboardActions = KeyboardActions(
-                            onNext = { focusManager.moveFocus(FocusDirection.Down) }
-                        )
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text, imeAction = ImeAction.Next),
+                        keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) })
                     )
                     Spacer(Modifier.height(14.dp))
                     RoleMatchTextField(
@@ -603,13 +520,8 @@ fun RegisterRestaurantScreen(
                         isError = state.emailError.isNotEmpty(),
                         errorMessage = state.emailError,
                         placeholder = "seu@email.com",
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Email,
-                            imeAction = ImeAction.Next
-                        ),
-                        keyboardActions = KeyboardActions(
-                            onNext = { focusManager.moveFocus(FocusDirection.Down) }
-                        )
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next),
+                        keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) })
                     )
                     Spacer(Modifier.height(14.dp))
                     RoleMatchTextField(
@@ -620,13 +532,8 @@ fun RegisterRestaurantScreen(
                         isError = state.phoneError.isNotEmpty(),
                         errorMessage = state.phoneError,
                         placeholder = "(11) 98765-4321",
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Phone,
-                            imeAction = ImeAction.Next
-                        ),
-                        keyboardActions = KeyboardActions(
-                            onNext = { focusManager.moveFocus(FocusDirection.Down) }
-                        )
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone, imeAction = ImeAction.Next),
+                        keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) })
                     )
                     Spacer(Modifier.height(14.dp))
 
@@ -639,13 +546,8 @@ fun RegisterRestaurantScreen(
                         isError = state.cnpjError.isNotEmpty(),
                         errorMessage = state.cnpjError,
                         placeholder = "00.000.000/0000-00",
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Text,  // Text para aceitar letras
-                            imeAction = ImeAction.Next
-                        ),
-                        keyboardActions = KeyboardActions(
-                            onNext = { focusManager.moveFocus(FocusDirection.Down) }
-                        )
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text, imeAction = ImeAction.Next),
+                        keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) })
                     )
                     Spacer(Modifier.height(14.dp))
                     PasswordTextField(
@@ -670,44 +572,22 @@ fun RegisterRestaurantScreen(
 
                     Spacer(Modifier.height(16.dp))
 
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
+                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                         Checkbox(
                             checked = state.termsAccepted,
                             onCheckedChange = viewModel::onTermsChange,
                             colors = CheckboxDefaults.colors(
                                 checkedColor = PrimaryGreen,
-                                uncheckedColor = if (state.termsError.isNotEmpty())
-                                    MaterialTheme.colorScheme.error
-                                else
-                                    MaterialTheme.colorScheme.outline
+                                uncheckedColor = if (state.termsError.isNotEmpty()) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.outline
                             )
                         )
                         Spacer(Modifier.width(4.dp))
                         Text(
                             buildAnnotatedString {
-                                withStyle(SpanStyle(
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    fontSize = 13.sp
-                                )) { append("Li e aceito os ") }
-                                withStyle(SpanStyle(
-                                    color = PrimaryGreen,
-                                    fontSize = 13.sp,
-                                    fontWeight = FontWeight.SemiBold,
-                                    textDecoration = TextDecoration.Underline
-                                )) { append("Termos de Uso") }
-                                withStyle(SpanStyle(
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    fontSize = 13.sp
-                                )) { append(" e a ") }
-                                withStyle(SpanStyle(
-                                    color = PrimaryGreen,
-                                    fontSize = 13.sp,
-                                    fontWeight = FontWeight.SemiBold,
-                                    textDecoration = TextDecoration.Underline
-                                )) { append("Política de Privacidade") }
+                                withStyle(SpanStyle(color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 13.sp)) { append("Li e aceito os ") }
+                                withStyle(SpanStyle(color = PrimaryGreen, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, textDecoration = TextDecoration.Underline)) { append("Termos de Uso") }
+                                withStyle(SpanStyle(color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 13.sp)) { append(" e a ") }
+                                withStyle(SpanStyle(color = PrimaryGreen, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, textDecoration = TextDecoration.Underline)) { append("Política de Privacidade") }
                             }
                         )
                     }
@@ -723,44 +603,24 @@ fun RegisterRestaurantScreen(
                     if (state.generalError.isNotEmpty()) {
                         Spacer(Modifier.height(14.dp))
                         Card(
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.errorContainer
-                            ),
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
                             shape = RoundedCornerShape(8.dp),
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text(
-                                state.generalError,
-                                color = MaterialTheme.colorScheme.error,
-                                fontSize = 13.sp,
-                                modifier = Modifier.padding(12.dp)
-                            )
+                            Text(state.generalError, color = MaterialTheme.colorScheme.error, fontSize = 13.sp, modifier = Modifier.padding(12.dp))
                         }
                     }
 
                     Spacer(Modifier.height(24.dp))
-                    PrimaryButton(
-                        "Criar conta",
-                        viewModel::onRegister,
-                        Modifier.fillMaxWidth(),
-                        isLoading = state.isLoading
-                    )
+                    PrimaryButton("Criar conta", viewModel::onRegister, Modifier.fillMaxWidth(), isLoading = state.isLoading)
 
                     Spacer(Modifier.height(16.dp))
-                    Box(
-                        modifier = Modifier.fillMaxWidth(),
-                        contentAlignment = Alignment.Center
-                    ) {
+                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                         TextButton(onClick = onNavigateToLogin) {
                             Text(
                                 buildAnnotatedString {
-                                    withStyle(SpanStyle(
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )) { append("Já tem uma conta? ") }
-                                    withStyle(SpanStyle(
-                                        color = PrimaryGreen,
-                                        fontWeight = FontWeight.Bold
-                                    )) { append("Faça login") }
+                                    withStyle(SpanStyle(color = MaterialTheme.colorScheme.onSurfaceVariant)) { append("Já tem uma conta? ") }
+                                    withStyle(SpanStyle(color = PrimaryGreen, fontWeight = FontWeight.Bold)) { append("Faça login") }
                                 },
                                 fontSize = 14.sp
                             )

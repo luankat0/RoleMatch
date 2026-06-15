@@ -30,7 +30,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.pentagono.rolematch.core.common.MockData
 import com.pentagono.rolematch.core.common.RMIcons
 import com.pentagono.rolematch.core.theme.*
-import com.pentagono.rolematch.data.repository.RepositoryProvider
+import com.pentagono.rolematch.RoleMatchApplication
 import com.pentagono.rolematch.domain.model.Reservation
 import com.pentagono.rolematch.presentation.components.*
 import kotlinx.coroutines.launch
@@ -46,13 +46,6 @@ fun MatchPreferencesScreen(
     viewModel: MatchViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 ) {
     val state by viewModel.state.collectAsState()
-
-    // Navega para resultados apenas quando a busca terminar
-    LaunchedEffect(state.hasSearched) {
-        if (state.hasSearched) {
-            onNavigateToResults()
-        }
-    }
 
     Scaffold(
         topBar = {
@@ -80,6 +73,7 @@ fun MatchPreferencesScreen(
                         if (!state.isLoading) {
                             viewModel.resetSearch()
                             viewModel.search()
+                            onNavigateToResults()
                         }
                     },
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
@@ -207,7 +201,10 @@ fun ProfileScreen(
     val userState by userViewModel.state.collectAsState()
     val user = userState.user
 
-    val reservationRepo = remember { RepositoryProvider.reservation }
+    val profileContext = LocalContext.current
+    val reservationRepo = remember {
+        (profileContext.applicationContext as RoleMatchApplication).appComponent.reservationRepository()
+    }
     var reservations by remember { mutableStateOf<List<Reservation>>(emptyList()) }
     var reservationsLoading by remember { mutableStateOf(true) }
     val scope = rememberCoroutineScope()
@@ -225,7 +222,7 @@ fun ProfileScreen(
         }
     }
 
-    val profilePhotoContext = LocalContext.current
+    val profilePhotoContext = profileContext
     var isUploadingPhoto by remember { mutableStateOf(false) }
     val profilePhotoScope = rememberCoroutineScope()
 

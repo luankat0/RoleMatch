@@ -15,15 +15,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.google.firebase.firestore.FirebaseFirestore
+import com.pentagono.rolematch.RoleMatchApplication
 import com.pentagono.rolematch.core.common.MockData
 import com.pentagono.rolematch.core.theme.*
-import com.pentagono.rolematch.data.repository.RepositoryProvider
 import com.pentagono.rolematch.domain.model.Address
 import com.pentagono.rolematch.domain.model.Coupon
 import com.pentagono.rolematch.domain.model.Restaurant
@@ -147,6 +148,11 @@ fun RestaurantDetailScreen(
     onNavigateToReservation: (String) -> Unit,
     onNavigateToCouponDetails: (String) -> Unit
 ) {
+    val context = LocalContext.current
+    val couponRepo = remember {
+        (context.applicationContext as RoleMatchApplication).appComponent.couponRepository()
+    }
+
     // Busca do MockData primeiro, se não achar busca do Firestore
     var restaurant by remember { mutableStateOf<Restaurant?>(MockData.getRestaurantById(restaurantId)) }
     var coupons by remember { mutableStateOf(MockData.getCouponsForRestaurant(restaurantId)) }
@@ -161,19 +167,11 @@ fun RestaurantDetailScreen(
     LaunchedEffect(restaurantId) {
         // Busca cupons do Firestore para restaurantes não-mock
         if (!isMockRestaurant) {
-            android.util.Log.d("CouponDebug", "Buscando cupons para restaurantId: $restaurantId")
-            val couponResult = RepositoryProvider.coupon.getCouponsByRestaurant(restaurantId)
+            val couponResult = couponRepo.getCouponsByRestaurant(restaurantId)
             couponResult.fold(
-                onSuccess = { list ->
-                    android.util.Log.d("CouponDebug", "Cupons encontrados: ${list.size}")
-                    coupons = list
-                },
-                onFailure = { e ->
-                    android.util.Log.e("CouponDebug", "Erro: ${e.message}")
-                }
+                onSuccess = { list -> coupons = list },
+                onFailure = { }
             )
-        } else {
-            android.util.Log.d("CouponDebug", "Restaurante mock, pulando busca de cupons")
         }
 
         if (restaurant == null) {
@@ -288,10 +286,10 @@ fun RestaurantDetailScreen(
                         }
                         Spacer(Modifier.height(10.dp))
                         val tags = r.cuisineTypes + r.establishmentTypes +
-                            listOfNotNull(
-                                if (r.features.petFriendly) "🐾 Pet Friendly" else null,
-                                if (r.features.kidsArea) "👶 Área Kids" else null
-                            )
+                                listOfNotNull(
+                                    if (r.features.petFriendly) "🐾 Pet Friendly" else null,
+                                    if (r.features.kidsArea) "👶 Área Kids" else null
+                                )
                         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                             tags.chunked(3).forEach { rowTags ->
                                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {

@@ -10,7 +10,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -18,15 +17,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.pentagono.rolematch.core.theme.*
 import com.pentagono.rolematch.core.validators.EmailValidator
-import com.pentagono.rolematch.data.repository.RepositoryProvider
+import com.pentagono.rolematch.di.appViewModel
+import com.pentagono.rolematch.domain.repository.AuthRepository
 import com.pentagono.rolematch.presentation.components.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 data class ForgotPasswordState(
     val email: String = "",
@@ -36,12 +36,12 @@ data class ForgotPasswordState(
     val error: String = ""
 )
 
-class ForgotPasswordViewModel : ViewModel() {
+class ForgotPasswordViewModel @Inject constructor(
+    private val authRepository: AuthRepository
+) : ViewModel() {
 
     private val _state = MutableStateFlow(ForgotPasswordState())
     val state: StateFlow<ForgotPasswordState> = _state.asStateFlow()
-
-    private val authRepository = RepositoryProvider.auth
 
     fun onEmailChange(value: String) {
         _state.value = _state.value.copy(email = value, emailError = "", error = "")
@@ -62,10 +62,7 @@ class ForgotPasswordViewModel : ViewModel() {
 
             result.fold(
                 onSuccess = {
-                    _state.value = _state.value.copy(
-                        isLoading = false,
-                        isSent = true
-                    )
+                    _state.value = _state.value.copy(isLoading = false, isSent = true)
                 },
                 onFailure = { e ->
                     _state.value = _state.value.copy(
@@ -82,7 +79,7 @@ class ForgotPasswordViewModel : ViewModel() {
 fun ForgotPasswordScreen(
     onBack: () -> Unit,
     onEmailSent: () -> Unit,
-    viewModel: ForgotPasswordViewModel = viewModel()
+    viewModel: ForgotPasswordViewModel = appViewModel { ForgotPasswordViewModel(it.authRepository()) }
 ) {
     val state by viewModel.state.collectAsState()
 
@@ -142,9 +139,7 @@ fun ForgotPasswordScreen(
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(24.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface
-            ),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
             elevation = CardDefaults.cardElevation(4.dp)
         ) {
             Column(
@@ -152,25 +147,14 @@ fun ForgotPasswordScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Box(
-                    modifier = Modifier
-                        .size(72.dp)
-                        .background(LightGreen, RoundedCornerShape(36.dp)),
+                    modifier = Modifier.size(72.dp).background(LightGreen, RoundedCornerShape(36.dp)),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        Icons.Default.Lock,
-                        null,
-                        tint = PrimaryGreen,
-                        modifier = Modifier.size(36.dp)
-                    )
+                    Icon(Icons.Default.Lock, null, tint = PrimaryGreen, modifier = Modifier.size(36.dp))
                 }
 
                 Spacer(Modifier.height(20.dp))
-                Text(
-                    "Esqueceu a senha?",
-                    fontWeight = FontWeight.ExtraBold,
-                    fontSize = 22.sp
-                )
+                Text("Esqueceu a senha?", fontWeight = FontWeight.ExtraBold, fontSize = 22.sp)
                 Spacer(Modifier.height(8.dp))
                 Text(
                     "Digite seu e-mail e enviaremos um link para redefinir sua senha.",
@@ -195,9 +179,7 @@ fun ForgotPasswordScreen(
                 if (state.error.isNotEmpty()) {
                     Spacer(Modifier.height(12.dp))
                     Card(
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.errorContainer
-                        ),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
                         shape = RoundedCornerShape(8.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
@@ -232,15 +214,10 @@ fun ForgotPasswordScreen(
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface
-            ),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
             elevation = CardDefaults.cardElevation(1.dp)
         ) {
-            Row(
-                modifier = Modifier.padding(16.dp),
-                verticalAlignment = Alignment.Top
-            ) {
+            Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.Top) {
                 Icon(
                     Icons.Default.Info,
                     null,
@@ -249,12 +226,7 @@ fun ForgotPasswordScreen(
                 )
                 Spacer(Modifier.width(10.dp))
                 Column {
-                    Text(
-                        "Dica",
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 14.sp,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
+                    Text("Dica", fontWeight = FontWeight.SemiBold, fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurface)
                     Text(
                         "Verifique também a pasta de spam ou lixo eletrônico caso não encontre o e-mail na caixa de entrada.",
                         fontSize = 13.sp,

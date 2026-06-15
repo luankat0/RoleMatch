@@ -5,6 +5,7 @@ import android.net.Uri
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
@@ -72,7 +73,6 @@ fun AppNavGraph(
     loginViewModel: LoginViewModel,
     restaurantViewModel: RestaurantViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 ) {
-    val homeState by homeViewModel.state.collectAsState()
 
     NavHost(navController = navController, startDestination = startDestination) {
 
@@ -267,7 +267,11 @@ fun AppNavGraph(
             val matchViewModel: MatchViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
             MatchPreferencesScreen(
                 onBack = { navController.navigateUp() },
-                onNavigateToResults = { navController.navigate(Routes.MATCH_RESULTS) },
+                onNavigateToResults = {
+                    navController.navigate(Routes.MATCH_RESULTS) {
+                        launchSingleTop = true
+                    }
+                },
                 onNavigateToHome = { navController.navigate(Routes.USER_HOME) },
                 onNavigateToCoupons = { navController.navigate(Routes.COUPONS) },
                 onNavigateToProfile = { navController.navigate(Routes.USER_PROFILE) },
@@ -276,7 +280,8 @@ fun AppNavGraph(
         }
 
         composable(Routes.MATCH_RESULTS) {
-            val matchViewModel: MatchViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+            val matchEntry = remember(it) { navController.getBackStackEntry(Routes.MATCH) }
+            val matchViewModel: MatchViewModel = androidx.lifecycle.viewmodel.compose.viewModel(matchEntry)
             MatchResultsScreen(
                 onBack = { navController.navigateUp() },
                 onNavigateToRestaurant = { id ->
@@ -357,6 +362,7 @@ fun AppNavGraph(
         }
 
         composable(Routes.USER_PROFILE) {
+            val homeState by homeViewModel.state.collectAsState()
             ProfileScreen(
                 onNavigateToHome = { navController.navigate(Routes.USER_HOME) },
                 onNavigateToSearch = { navController.navigate(Routes.SEARCH) },

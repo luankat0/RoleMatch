@@ -5,12 +5,13 @@ import androidx.lifecycle.viewModelScope
 import com.pentagono.rolematch.core.security.SecurityManager
 import com.pentagono.rolematch.core.validators.EmailValidator
 import com.pentagono.rolematch.data.repository.FirebaseAuthRepository
-import com.pentagono.rolematch.data.repository.RepositoryProvider
 import com.pentagono.rolematch.domain.model.UserRole
+import com.pentagono.rolematch.domain.repository.AuthRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 data class LoginUiState(
     val email: String = "",
@@ -27,12 +28,13 @@ data class LoginUiState(
     val navigateToCompleteProfile: Boolean = false  // Google: primeira vez
 )
 
-class LoginViewModel : ViewModel() {
+class LoginViewModel @Inject constructor(
+    private val authRepository: AuthRepository
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LoginUiState())
     val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
 
-    private val authRepository = RepositoryProvider.auth
     private val firebaseAuthRepository = authRepository as? FirebaseAuthRepository
 
     // Função para lançar o intent do Google (definida pela MainActivity)

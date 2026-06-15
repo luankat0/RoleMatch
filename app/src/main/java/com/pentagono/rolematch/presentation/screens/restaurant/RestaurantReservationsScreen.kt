@@ -17,20 +17,21 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.pentagono.rolematch.core.common.RMIcons
 import com.pentagono.rolematch.core.theme.*
-import com.pentagono.rolematch.data.repository.RepositoryProvider
+import com.pentagono.rolematch.di.appViewModel
 import com.pentagono.rolematch.domain.model.Reservation
 import com.pentagono.rolematch.domain.model.ReservationStatus
+import com.pentagono.rolematch.domain.repository.ReservationRepository
 import com.pentagono.rolematch.presentation.components.SecondaryButton
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import javax.inject.Inject
 
 data class RestaurantReservationsState(
     val reservations: List<Reservation> = emptyList(),
@@ -39,12 +40,13 @@ data class RestaurantReservationsState(
     val filterTab: String = "todas" // "todas", "hoje", "confirmadas", "pendentes"
 )
 
-class RestaurantReservationsViewModel : ViewModel() {
+class RestaurantReservationsViewModel @Inject constructor(
+    private val reservationRepo: ReservationRepository
+) : ViewModel() {
 
     private val _state = MutableStateFlow(RestaurantReservationsState())
     val state: StateFlow<RestaurantReservationsState> = _state.asStateFlow()
 
-    private val reservationRepo = RepositoryProvider.reservation
     private val auth = FirebaseAuth.getInstance()
     private val firestore = FirebaseFirestore.getInstance()
 
@@ -99,7 +101,7 @@ class RestaurantReservationsViewModel : ViewModel() {
 @Composable
 fun RestaurantReservationsScreen(
     onBack: () -> Unit,
-    viewModel: RestaurantReservationsViewModel = viewModel()
+    viewModel: RestaurantReservationsViewModel = appViewModel { RestaurantReservationsViewModel(it.reservationRepository()) }
 ) {
     val state by viewModel.state.collectAsState()
 

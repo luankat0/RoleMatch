@@ -184,7 +184,10 @@ fun ReservationScreen(restaurantId: String, onBack: () -> Unit, onConfirmed: () 
     var showSuccess by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
     var errorMsg by remember { mutableStateOf("") }
-    val reservationRepo = com.pentagono.rolematch.data.repository.RepositoryProvider.reservation
+    val reservationContext = androidx.compose.ui.platform.LocalContext.current
+    val reservationRepo = remember {
+        (reservationContext.applicationContext as com.pentagono.rolematch.RoleMatchApplication).appComponent.reservationRepository()
+    }
     val scope = androidx.compose.runtime.rememberCoroutineScope()
     val timeSlots = listOf("12:00","12:30","13:00","13:30","14:00","14:30","18:00","18:30","19:00","19:30","20:00","20:30","21:00","21:30","22:00")
 

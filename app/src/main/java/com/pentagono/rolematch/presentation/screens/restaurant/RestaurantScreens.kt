@@ -70,10 +70,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.pentagono.rolematch.RoleMatchApplication
 import com.pentagono.rolematch.core.common.MockData
 import com.pentagono.rolematch.core.common.RMIcons
 import com.pentagono.rolematch.core.theme.BorderLight
@@ -113,7 +115,10 @@ fun RestaurantHomeScreen(
     val restaurant = restaurantState.restaurant
 
     // Reservas reais de hoje do Firestore
-    val reservationRepo = remember { com.pentagono.rolematch.data.repository.RepositoryProvider.reservation }
+    val context = LocalContext.current
+    val reservationRepo = remember {
+        (context.applicationContext as RoleMatchApplication).appComponent.reservationRepository()
+    }
     var reservations by remember { mutableStateOf<List<com.pentagono.rolematch.domain.model.Reservation>>(emptyList()) }
 
     // Hoje em múltiplos formatos para comparar com o que o usuário digitou
@@ -352,8 +357,10 @@ fun RestaurantDashboardScreen(
     val restaurant = restaurantState.restaurant
 
     // Métricas reais do Firestore
-    val couponRepo = remember { com.pentagono.rolematch.data.repository.RepositoryProvider.coupon }
-    val reservationRepo = remember { com.pentagono.rolematch.data.repository.RepositoryProvider.reservation }
+    val context = LocalContext.current
+    val appComponent = remember { (context.applicationContext as RoleMatchApplication).appComponent }
+    val couponRepo = remember { appComponent.couponRepository() }
+    val reservationRepo = remember { appComponent.reservationRepository() }
     var totalReservations by remember { mutableStateOf("...") }
     var totalCouponsRedeemed by remember { mutableStateOf("...") }
     var avgRating by remember { mutableStateOf("...") }

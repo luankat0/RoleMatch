@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     id("com.google.gms.google-services")
+    id("com.google.devtools.ksp")
 }
 
 android {
@@ -40,6 +41,7 @@ android {
 dependencies {
     // Core
     implementation(libs.androidx.core.ktx)
+    implementation("androidx.core:core-splashscreen:1.0.1")
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(platform("androidx.compose:compose-bom:2024.09.00"))
@@ -80,9 +82,13 @@ dependencies {
 
     // ML Kit + Camera (QR scanner)
     implementation("com.google.mlkit:barcode-scanning:17.3.0")
-    implementation("androidx.camera:camera-camera2:1.4.1")
-    implementation("androidx.camera:camera-lifecycle:1.4.1")
-    implementation("androidx.camera:camera-view:1.4.1")
+    implementation("androidx.camera:camera-camera2:1.3.4")
+    implementation("androidx.camera:camera-lifecycle:1.3.4")
+    implementation("androidx.camera:camera-view:1.3.4")
+
+    // Hilt
+    implementation("com.google.dagger:dagger:2.56.1")
+    ksp("com.google.dagger:dagger-compiler:2.56.1")
 
     // Testing
     testImplementation(libs.junit)

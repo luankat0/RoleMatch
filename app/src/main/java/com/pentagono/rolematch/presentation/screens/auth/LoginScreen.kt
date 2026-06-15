@@ -19,7 +19,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.pentagono.rolematch.core.common.RMIcons
 import com.pentagono.rolematch.core.theme.*
 import com.pentagono.rolematch.presentation.components.*
@@ -33,7 +32,7 @@ fun LoginScreen(
     onNavigateToRegisterRestaurant: () -> Unit,
     onForgotPassword: () -> Unit,
     onNavigateToCompleteProfile: () -> Unit = {},
-    viewModel: LoginViewModel = viewModel()
+    viewModel: LoginViewModel
 ) {
     val state by viewModel.uiState.collectAsState()
 

@@ -67,7 +67,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.pentagono.rolematch.core.common.MockData
 import com.pentagono.rolematch.core.theme.BorderLight
@@ -81,12 +80,13 @@ import com.pentagono.rolematch.core.theme.TextLight
 import com.pentagono.rolematch.core.theme.TextMuted
 import com.pentagono.rolematch.core.theme.WarningYellow
 import com.pentagono.rolematch.core.validators.CnpjValidator
-import com.pentagono.rolematch.data.repository.RepositoryProvider
+import com.pentagono.rolematch.di.appViewModel
 import com.pentagono.rolematch.domain.model.Address
 import com.pentagono.rolematch.domain.model.Restaurant
 import com.pentagono.rolematch.domain.model.RestaurantFeatures
 import com.pentagono.rolematch.domain.model.RestaurantStatus
 import com.pentagono.rolematch.domain.model.ServiceMode
+import com.pentagono.rolematch.domain.repository.RestaurantRepository
 import com.pentagono.rolematch.presentation.components.ConfirmCancelDialog
 import com.pentagono.rolematch.presentation.components.PrimaryButton
 import com.pentagono.rolematch.presentation.components.RoleMatchLogo
@@ -98,6 +98,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 data class RestaurantSetupState(
     val step: Int = 0,
@@ -140,11 +141,11 @@ private fun defaultHours() = mapOf(
     "Domingo" to ("12:00" to "22:00")
 )
 
-class RestaurantSetupViewModel : ViewModel() {
+class RestaurantSetupViewModel @Inject constructor(
+    private val restaurantRepository: RestaurantRepository
+) : ViewModel() {
     private val _state = MutableStateFlow(RestaurantSetupState())
     val state: StateFlow<RestaurantSetupState> = _state.asStateFlow()
-
-    private val restaurantRepository = RepositoryProvider.restaurant
 
     // Canal de evento único para navegação — não duplica em recomposição
     private val _navigationEvent = Channel<Unit>(Channel.BUFFERED)
@@ -241,18 +242,15 @@ class RestaurantSetupViewModel : ViewModel() {
                 )
                 val result = restaurantRepository.createRestaurant(restaurant)
                 result.fold(
-                    onSuccess = { id ->
-                        android.util.Log.d("RestaurantSetup", "Salvo! ID: $id")
+                    onSuccess = {
                         update { copy(isSubmitting = false) }
                         _navigationEvent.send(Unit)
                     },
                     onFailure = { error ->
-                        android.util.Log.e("RestaurantSetup", "Erro: ${error.message}")
                         update { copy(isSubmitting = false, generalError = error.message ?: "Erro ao salvar restaurante") }
                     }
                 )
             } catch (e: Exception) {
-                android.util.Log.e("RestaurantSetup", "Exception: ${e.message}")
                 update { copy(isSubmitting = false, generalError = e.message ?: "Erro ao salvar restaurante") }
             }
         }
@@ -267,7 +265,7 @@ class RestaurantSetupViewModel : ViewModel() {
 fun RestaurantSetupScreen(
     onCancel: () -> Unit,
     onCompleted: () -> Unit,
-    viewModel: RestaurantSetupViewModel = viewModel()
+    viewModel: RestaurantSetupViewModel = appViewModel { RestaurantSetupViewModel(it.restaurantRepository()) }
 ) {
     val state by viewModel.state.collectAsState()
 

@@ -16,11 +16,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.pentagono.rolematch.core.CredentialHolder
 import com.pentagono.rolematch.core.theme.*
-import com.pentagono.rolematch.data.repository.RepositoryProvider
+import com.pentagono.rolematch.di.appViewModel
+import com.pentagono.rolematch.domain.repository.AuthRepository
 import com.pentagono.rolematch.presentation.components.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.tasks.await
@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 // ─── ViewModel ────────────────────────────────────────────────────────────────
 
@@ -41,13 +42,14 @@ data class VerifyEmailState(
     val resendCountdown: Int = 0
 )
 
-class VerifyEmailViewModel : ViewModel() {
+class VerifyEmailViewModel @Inject constructor(
+    private val authRepository: AuthRepository
+) : ViewModel() {
 
     private val _state = MutableStateFlow(VerifyEmailState())
     val state: StateFlow<VerifyEmailState> = _state.asStateFlow()
 
     private val auth = FirebaseAuth.getInstance()
-    private val authRepository = RepositoryProvider.auth
 
     fun checkVerification() {
         viewModelScope.launch {
@@ -58,7 +60,6 @@ class VerifyEmailViewModel : ViewModel() {
                     val email = CredentialHolder.email
                     val password = CredentialHolder.password
                     if (email.isNotEmpty() && password.isNotEmpty()) {
-                        android.util.Log.d("VerifyEmail", "currentUser null — reautenticando: $email")
                         auth.signInWithEmailAndPassword(email, password).await()
                     } else {
                         _state.value = _state.value.copy(
@@ -75,9 +76,6 @@ class VerifyEmailViewModel : ViewModel() {
                 auth.currentUser?.reload()?.await()
 
                 val user = auth.currentUser
-                android.util.Log.d("VerifyEmail", "user: ${user?.email}")
-                android.util.Log.d("VerifyEmail", "isEmailVerified: ${user?.isEmailVerified}")
-
                 val verified = user?.isEmailVerified == true
                 if (verified) {
                     CredentialHolder.clear()
@@ -88,7 +86,6 @@ class VerifyEmailViewModel : ViewModel() {
                     error = if (!verified) "E-mail ainda não verificado. Verifique sua caixa de entrada." else ""
                 )
             } catch (e: Exception) {
-                android.util.Log.e("VerifyEmail", "Erro: ${e.message}")
                 _state.value = _state.value.copy(
                     isLoading = false,
                     error = e.message ?: "Erro ao verificar"
@@ -143,7 +140,7 @@ fun VerifyEmailScreen(
     accountType: String,
     onVerified: () -> Unit,
     onBack: () -> Unit,
-    viewModel: VerifyEmailViewModel = viewModel()
+    viewModel: VerifyEmailViewModel = appViewModel { VerifyEmailViewModel(it.authRepository()) }
 ) {
     val state by viewModel.state.collectAsState()
     val userEmail = FirebaseAuth.getInstance().currentUser?.email
@@ -177,27 +174,15 @@ fun VerifyEmailScreen(
                 modifier = Modifier.padding(28.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Ícone
                 Box(
-                    modifier = Modifier
-                        .size(80.dp)
-                        .background(LightGreen, RoundedCornerShape(40.dp)),
+                    modifier = Modifier.size(80.dp).background(LightGreen, RoundedCornerShape(40.dp)),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        Icons.Default.MailOutline,
-                        null,
-                        tint = PrimaryGreen,
-                        modifier = Modifier.size(40.dp)
-                    )
+                    Icon(Icons.Default.MailOutline, null, tint = PrimaryGreen, modifier = Modifier.size(40.dp))
                 }
 
                 Spacer(Modifier.height(20.dp))
-                Text(
-                    "Verifique seu e-mail",
-                    fontWeight = FontWeight.ExtraBold,
-                    fontSize = 22.sp
-                )
+                Text("Verifique seu e-mail", fontWeight = FontWeight.ExtraBold, fontSize = 22.sp)
                 Spacer(Modifier.height(8.dp))
                 Text(
                     "Enviamos um link de verificação para:",
@@ -237,19 +222,13 @@ fun VerifyEmailScreen(
 
                 Spacer(Modifier.height(20.dp))
 
-                // Erros e mensagens
                 if (state.error.isNotEmpty()) {
                     Card(
                         colors = CardDefaults.cardColors(containerColor = Color(0xFFFEE2E2)),
                         shape = RoundedCornerShape(8.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text(
-                            state.error,
-                            color = DiscountRed,
-                            fontSize = 13.sp,
-                            modifier = Modifier.padding(12.dp)
-                        )
+                        Text(state.error, color = DiscountRed, fontSize = 13.sp, modifier = Modifier.padding(12.dp))
                     }
                     Spacer(Modifier.height(12.dp))
                 }
@@ -269,7 +248,6 @@ fun VerifyEmailScreen(
                     Spacer(Modifier.height(12.dp))
                 }
 
-                // Botão principal
                 PrimaryButton(
                     text = "✓ Já verifiquei meu e-mail",
                     onClick = viewModel::checkVerification,
@@ -279,7 +257,6 @@ fun VerifyEmailScreen(
 
                 Spacer(Modifier.height(12.dp))
 
-                // Reenviar
                 if (state.canResend) {
                     SecondaryButton(
                         text = "Reenviar e-mail",
@@ -293,10 +270,7 @@ fun VerifyEmailScreen(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp)
                     ) {
-                        Text(
-                            "Reenviar em ${state.resendCountdown}s",
-                            color = TextMuted
-                        )
+                        Text("Reenviar em ${state.resendCountdown}s", color = TextMuted)
                     }
                 }
 

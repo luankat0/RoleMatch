@@ -1,6 +1,7 @@
 package com.pentagono.rolematch
 
 import android.os.Bundle
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -15,15 +16,22 @@ import com.google.android.gms.common.api.ApiException
 import com.pentagono.rolematch.core.navigation.AppNavGraph
 import com.pentagono.rolematch.core.theme.RoleMatchTheme
 import com.pentagono.rolematch.core.theme.ThemeViewModel
+import com.pentagono.rolematch.di.AppViewModelFactory
 import com.pentagono.rolematch.presentation.screens.auth.LoginViewModel
 import com.pentagono.rolematch.presentation.screens.restaurant.RestaurantViewModel
 import com.pentagono.rolematch.presentation.screens.user.HomeViewModel
 
 class MainActivity : ComponentActivity() {
 
+    // LoginViewModel agora usa @Inject constructor; precisa da AppViewModelFactory
+    // (criada com o appComponent da Application) para o by viewModels() funcionar.
+    private val loginViewModel: LoginViewModel by viewModels {
+        AppViewModelFactory((application as RoleMatchApplication).appComponent)
+    }
+
+    // Sem dependências do Dagger — continuam com construtor padrão
     private val themeViewModel: ThemeViewModel by viewModels()
     private val homeViewModel: HomeViewModel by viewModels()
-    private val loginViewModel: LoginViewModel by viewModels()
     private val restaurantViewModel: RestaurantViewModel by viewModels()
 
     // Launcher para o Google Sign-In
@@ -46,6 +54,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        installSplashScreen()
         enableEdgeToEdge()
 
         // Configura o Google Sign-In
